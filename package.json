@@ -1,0 +1,14 @@
+{
+  "name": "cfl-connector",
+  "version": "1.0.0",
+  "description": "Local dashboard that sends paced CoFoundersLab connection requests with a default note",
+  "main": "server.js",
+  "scripts": {
+    "postinstall": "playwright install chromium",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "playwright": "^1.47.0"
+  }
+}

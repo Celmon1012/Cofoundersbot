@@ -1,0 +1,5 @@
+node_modules/
+data/browser-profile/
+data/state.json
+data/inbox.json
+*.rar

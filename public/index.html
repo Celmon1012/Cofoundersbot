@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CFL Connector</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,560;9..144,640&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0f14;--card:#151a22;--card-2:#1c232e;--line:rgba(244,236,220,.1);
+    --text:#f6f1e7;--muted:#a3988c;--blue:#6cb6ff;--green:#7dcea0;--red:#e07a72;--amber:#e2b15a;
+    --shadow:0 18px 50px rgba(0,0,0,.28);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;color:var(--text);
+    font:15px/1.5 Outfit,system-ui,sans-serif;
+    background:
+      radial-gradient(900px 420px at 8% -10%, rgba(226,177,90,.16), transparent 55%),
+      radial-gradient(700px 380px at 100% 0%, rgba(108,182,255,.1), transparent 50%),
+      var(--bg);
+    min-height:100vh;
+  }
+  header{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:22px 28px 8px;max-width:1240px;margin:0 auto;
+  }
+  .brand{display:flex;align-items:center;gap:12px}
+  .mark{
+    width:36px;height:36px;border-radius:12px;display:grid;place-items:center;
+    background:linear-gradient(160deg,#f0d7a4,#c9843a);color:#2a1c0a;font:700 16px Fraunces,serif;
+    box-shadow:0 8px 20px rgba(201,132,58,.28);
+  }
+  h1{font:600 22px/1.1 Fraunces,serif;margin:0;letter-spacing:-.02em}
+  .sub{color:var(--muted);font-size:12px;margin-top:2px}
+  .pills{display:flex;gap:8px;align-items:center}
+  .pill{
+    padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;
+    background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--line);
+  }
+  .pill.running{background:rgba(125,206,160,.14);color:var(--green);border-color:transparent}
+  .pill.warn{background:rgba(226,177,90,.14);color:var(--amber);border-color:transparent}
+  main{max-width:1240px;margin:0 auto;padding:18px 28px 40px;display:flex;flex-direction:column;gap:18px}
+  .top{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr);gap:18px}
+  @media(max-width:980px){header,main{padding-left:16px;padding-right:16px}.top,.activity{grid-template-columns:1fr}}
+  .card{
+    background:linear-gradient(180deg,rgba(255,255,255,.03),transparent 40%),var(--card);
+    border:1px solid var(--line);border-radius:18px;padding:18px 18px 16px;
+    box-shadow:var(--shadow);
+  }
+  .card h2{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 14px}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .stat{background:var(--card-2);border:1px solid var(--line);border-radius:16px;padding:14px 14px 12px}
+  .stat b{display:block;font:600 28px/1 Fraunces,serif;letter-spacing:-.03em}
+  .stat span{color:var(--muted);font-size:12px}
+  .bar{height:5px;background:rgba(255,255,255,.06);border-radius:99px;margin-top:10px;overflow:hidden}
+  .bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#e2b15a,#f3ddb0)}
+  label{display:block;font-size:12px;color:var(--muted);margin:14px 0 6px}
+  textarea,input{
+    width:100%;background:#0e131a;border:1px solid var(--line);color:var(--text);
+    border-radius:12px;padding:11px 12px;font:inherit;outline:none;
+  }
+  textarea:focus,input:focus{border-color:rgba(226,177,90,.55);box-shadow:0 0 0 3px rgba(226,177,90,.12)}
+  textarea{min-height:220px;resize:vertical;font-size:13.5px;line-height:1.55}
+  textarea.reply{min-height:72px;margin-top:10px}
+  .row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  @media(max-width:640px){.row,.stats{grid-template-columns:1fr}}
+  .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  button{
+    border:1px solid transparent;border-radius:12px;padding:10px 14px;
+    font:600 14px Outfit,sans-serif;cursor:pointer;color:var(--text);background:#243041;
+    transition:transform .12s ease,filter .12s ease;
+  }
+  button:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.08)}
+  button.primary{background:#3d8dff;color:#07111f}
+  button.go{background:#2f9e6b;color:#04140d}
+  button.stop{background:#c4544c;color:#1a0706}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  .hint{color:var(--muted);font-size:12.5px;margin:8px 0 0}
+  .stack{display:flex;flex-direction:column;gap:18px;min-width:0}
+  .replies{display:flex;flex-direction:column;min-height:100%;height:100%}
+  .panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+  .panel-head h2{margin:0}
+  #inboxCount{margin-left:6px}
+  .head-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .head-actions button{padding:6px 10px;font-size:12px}
+  .activity{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}
+  #log,.hist{height:380px;overflow:auto;padding-right:4px}
+  #log::-webkit-scrollbar,.hist::-webkit-scrollbar,#inbox::-webkit-scrollbar{width:8px}
+  #log::-webkit-scrollbar-thumb,.hist::-webkit-scrollbar-thumb,#inbox::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:99px}
+  .log-line{
+    display:grid;grid-template-columns:76px 16px minmax(0,1fr);gap:8px;align-items:start;
+    padding:9px 2px;border-bottom:1px solid rgba(255,255,255,.05);font-size:13.5px;
+  }
+  .log-line time{grid-column:1;color:var(--muted);font-variant-numeric:tabular-nums;font-size:12px;padding-top:1px;white-space:nowrap}
+  .log-line span{grid-column:3}
+  .log-line::before{
+    content:"";grid-column:2;width:8px;height:8px;border-radius:50%;margin-top:5px;background:#6d645b;
+    box-shadow:0 0 0 3px rgba(255,255,255,.04);
+  }
+  .log-line.success::before{background:var(--green)}
+  .log-line.warn::before{background:var(--amber)}
+  .log-line.error::before{background:var(--red)}
+  .log-line span{white-space:pre-wrap}
+  .log-line.success span{color:#d7f3e4}
+  .log-line.warn span{color:#f6e3b8}
+  .log-line.error span{color:#f6cfcb}
+  .req{
+    display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:12px;align-items:center;
+    padding:10px 4px;border-bottom:1px solid rgba(255,255,255,.05);
+  }
+  .av{
+    width:36px;height:36px;border-radius:12px;display:grid;place-items:center;
+    font-weight:700;background:#243041;color:#d5e6ff;
+  }
+  .av.success{background:rgba(125,206,160,.16);color:var(--green)}
+  .av.warn{background:rgba(226,177,90,.16);color:var(--amber)}
+  .av.error{background:rgba(224,122,114,.16);color:var(--red)}
+  .req-main{min-width:0}
+  .req-main b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .req-main time{color:var(--muted);font-size:12px}
+  .chip{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:4px 8px;border-radius:999px}
+  .chip.success{background:rgba(125,206,160,.14);color:var(--green)}
+  .chip.warn{background:rgba(226,177,90,.14);color:var(--amber)}
+  .chip.error{background:rgba(224,122,114,.14);color:var(--red)}
+  .success{color:var(--green)} .error{color:var(--red)} .warn{color:var(--amber)}
+  .msg{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;background:#10151c}
+  .msg-top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+  .msg-body{white-space:pre-wrap;margin-top:6px;max-height:120px;overflow:auto}
+  .msg-line{color:var(--muted);font-size:11px;margin-top:8px}
+  #inbox{
+    flex:1;min-height:320px;overflow:auto;padding:10px;
+    background:#0e131a;border:1px solid var(--line);border-radius:14px;
+  }
+  .empty{height:100%;min-height:280px;display:grid;place-items:center;text-align:center;color:var(--muted);padding:28px 16px}
+  @media(max-width:980px){.replies{min-height:480px;height:auto}}
+  .check{display:flex;align-items:center;gap:8px;margin-top:14px;color:var(--text);font-size:14px;text-transform:none;letter-spacing:0}
+  .check input{width:auto}
+  code{font-size:12px;color:#f0d7a4}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="mark">C</div>
+    <div>
+      <h1>CoFoundersLab</h1>
+      <div class="sub">Connection desk</div>
+    </div>
+  </div>
+  <div class="pills">
+    <span id="inboxBadge" class="pill warn" style="display:none"></span>
+    <span id="status" class="pill">idle</span>
+  </div>
+</header>
+<main>
+  <div class="top">
+  <section class="stack">
+    <div class="stats">
+      <div class="stat"><b id="today">0</b><span>sent today</span><div class="bar"><i id="todayBar"></i></div></div>
+      <div class="stat"><b id="total">0</b><span>sent all-time</span></div>
+      <div class="stat"><b id="next">—</b><span>next send in</span></div>
+    </div>
+    <div class="card">
+      <h2>Settings</h2>
+      <label for="message">Connection note</label>
+      <textarea id="message"></textarea>
+      <div class="hint"><span id="chars">0</span> characters</div>
+      <div class="row">
+        <div><label for="dailyLimit">Daily limit</label><input id="dailyLimit" type="number" min="1"></div>
+        <div><label for="minDelaySec">Min delay (sec)</label><input id="minDelaySec" type="number" min="5"></div>
+        <div><label for="maxDelaySec">Max delay (sec)</label><input id="maxDelaySec" type="number" min="5"></div>
+      </div>
+      <label for="startUrl">Start page (search URL, filters included)</label>
+      <input id="startUrl">
+      <label for="skipCountries">Skip countries</label>
+      <input id="skipCountries" placeholder="Country names, separated by commas">
+      <label for="skipRoles">Skip roles</label>
+      <input id="skipRoles" placeholder="co-founder, developer">
+      <label class="check" for="watchNewMembers"><input id="watchNewMembers" type="checkbox" checked> Send the note when someone registers (last 30 minutes)</label>
+      <div class="btns">
+        <button id="save">Save settings</button>
+        <button id="resetMsg">Restore default note</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Control</h2>
+      <div class="btns" style="margin-top:0">
+        <button id="open" class="primary">1. Open browser</button>
+        <button id="start" class="go">2. Start</button>
+        <button id="stop" class="stop">Stop</button>
+      </div>
+      <p class="hint">First run: open the browser and log in to CoFoundersLab in that window. Your login is kept in <code>data/browser-profile</code>.</p>
+    </div>
+  </section>
+  <section class="card replies">
+    <div class="panel-head">
+      <h2>Replies <span id="inboxCount"></span></h2>
+      <div class="head-actions">
+        <button id="checkInbox">Check now</button>
+        <button id="enableAlerts">Enable alerts</button>
+      </div>
+    </div>
+    <p class="hint" id="inboxHint">Messages other people send you show up here. Your own notes are hidden.</p>
+    <div id="inbox"></div>
+  </section>
+  </div>
+  <section class="activity">
+    <div class="card">
+      <h2>Live log</h2>
+      <div id="log"></div>
+    </div>
+    <div class="card">
+      <h2>Recent requests</h2>
+      <div class="hist" id="hist"></div>
+    </div>
+  </section>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const fields = ['message','dailyLimit','minDelaySec','maxDelaySec','startUrl','skipCountries','skipRoles'];
+let snap = null;
+
+async function api(path, body){
+  const r = await fetch(path,{method: body===undefined?'GET':'POST',headers:{'Content-Type':'application/json'},body: body===undefined?undefined:JSON.stringify(body)});
+  const j = await r.json(); if(!r.ok) alert(j.error||'Error'); return j;
+}
+function fillConfig(c){ fields.forEach(f=>$(f).value=c[f]??''); $('chars').textContent=c.message.length; $('watchNewMembers').checked=c.watchNewMembers!==false; if(c.skipRoles==null) $('skipRoles').value='co-founder, developer'; }
+function currentConfig(){ const c={}; fields.forEach(f=>c[f]=$(f).value); c.watchNewMembers=$('watchNewMembers').checked; return c; }
+$('message').addEventListener('input',()=>$('chars').textContent=$('message').value.length);
+$('save').onclick = async()=>{ fillConfig(await api('/api/config', currentConfig())); flash($('save'),'Saved ✓'); };
+$('resetMsg').onclick = async()=>fillConfig(await api('/api/config/reset-message',{}));
+$('open').onclick = ()=>api('/api/browser/open',{});
+$('start').onclick = async()=>{ await api('/api/config', currentConfig()); api('/api/start',{}); };
+$('stop').onclick = ()=>api('/api/stop',{});
+function flash(b,t){const o=b.textContent;b.textContent=t;setTimeout(()=>b.textContent=o,1200);}
+
+function render(s){
+  snap=s;
+  const st=$('status'); st.textContent=s.status; st.className='pill'+(s.running?' running':/limit|fail|login|closed/.test(s.status)?' warn':'');
+  $('today').textContent=s.state.sentToday; $('total').textContent=s.state.totalSent;
+  const lim=+$('dailyLimit').value||500; $('todayBar').style.width=Math.min(100,s.state.sentToday/lim*100)+'%';
+  $('start').disabled=s.running; $('stop').disabled=!s.running;
+  if (s.startUrl && document.activeElement !== $('startUrl')) $('startUrl').value = s.startUrl;
+  $('hist').innerHTML=s.state.history.slice(0,100).map(h=>{
+    const skipped=h.status==='skipped';
+    const label=h.ok?'sent':skipped?'skipped':'failed '+(h.status||'');
+    const cls=h.ok?'success':skipped?'warn':'error';
+    const initial=esc((h.name||'?').trim().charAt(0).toUpperCase()||'?');
+    return `<article class="req"><span class="av ${cls}">${initial}</span><div class="req-main"><b>${esc(h.name)}</b><time>${new Date(h.time).toLocaleTimeString()}</time></div><span class="chip ${cls}">${label}</span></article>`;
+  }).join('');
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+setInterval(()=>{ if(snap&&snap.nextSendAt){const s=Math.max(0,Math.round((new Date(snap.nextSendAt)-Date.now())/1000)); $('next').textContent=s+'s';} else $('next').textContent='—'; },500);
+
+function when(iso){ if(!iso) return ''; const d=new Date(iso); return isNaN(d)? '' : d.toLocaleString(); }
+function renderInbox(data){
+  const items=(data.items||[]).filter(item=>!item.replied);
+  const drafts={};
+  document.querySelectorAll('textarea.reply').forEach(t=>{ drafts[t.dataset.id]=t.value; });
+  const focusId=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.id;
+  $('inboxHint').textContent=data.error||'';
+  $('inboxHint').style.display=data.error?'':'none';
+  $('inboxCount').textContent=items.length?`(${items.length})`:'';
+  const badge=$('inboxBadge');
+  if(items.length){ badge.style.display=''; badge.textContent=items.length+' new'; document.title=`(${items.length}) CFL Connector`; }
+  else { badge.style.display='none'; document.title='CFL Connector'; }
+  $('inbox').innerHTML=items.map(item=>{
+    const lines=item.messages.map(m=>`<div class="msg-line">${esc(when(m.at))}</div><div class="msg-body">${esc(m.body)}</div>`).join('');
+    return `<article class="msg"><div class="msg-top"><b>${esc(item.name)}</b></div>${lines}<textarea class="reply" data-id="${esc(item.connectionId)}" placeholder="Write a reply to ${esc(item.name)}"></textarea><div class="btns"><button class="primary send-reply" data-id="${esc(item.connectionId)}" data-to="${esc(item.to)}">Reply</button></div></article>`;
+  }).join('')||'<div class="empty">No replies waiting.<br>New messages from other people show up in this box.</div>';
+  document.querySelectorAll('textarea.reply').forEach(t=>{
+    if(drafts[t.dataset.id]) t.value=drafts[t.dataset.id];
+    if(focusId&&t.dataset.id===focusId) t.focus();
+  });
+}
+$('inbox').onclick=async e=>{
+  const b=e.target.closest('.send-reply');
+  if(!b) return;
+  const box=$('inbox').querySelector(`textarea.reply[data-id="${CSS.escape(b.dataset.id)}"]`);
+  b.disabled=true;
+  try{
+    const j=await api('/api/inbox/reply',{connectionId:b.dataset.id,to:b.dataset.to,body:box?box.value:''});
+    if(j&&!j.error&&box) box.value='';
+  } finally { b.disabled=false; }
+};
+$('checkInbox').onclick=()=>api('/api/inbox/refresh',{});
+function alertsOn(){ return 'Notification' in window && Notification.permission==='granted'; }
+function syncAlertButton(){ $('enableAlerts').style.display=alertsOn()?'none':''; }
+$('enableAlerts').onclick=async()=>{
+  if(!('Notification' in window)) return alert('This browser cannot show desktop alerts.');
+  await Notification.requestPermission();
+  syncAlertButton();
+};
+syncAlertButton();
+function beep(){
+  try{
+    const ctx=new AudioContext();
+    const o=ctx.createOscillator();
+    const g=ctx.createGain();
+    o.frequency.value=880; o.connect(g); g.connect(ctx.destination);
+    g.gain.setValueAtTime(0.04, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.35);
+    o.start(); o.stop(ctx.currentTime+0.35);
+  }catch{}
+}
+
+const es=new EventSource('/events');
+es.addEventListener('status',e=>render(JSON.parse(e.data)));
+es.addEventListener('inbox',e=>renderInbox(JSON.parse(e.data)));
+es.addEventListener('alert',e=>{
+  const a=JSON.parse(e.data);
+  beep();
+  if(alertsOn()) new Notification(a.title,{body:a.body});
+});
+es.addEventListener('log',e=>{
+  const l=JSON.parse(e.data);
+  const d=document.createElement('div');
+  d.className='log-line '+l.level;
+  const time=document.createElement('time');
+  time.textContent=new Date(l.time).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+  const text=document.createElement('span');
+  text.textContent=l.text;
+  d.append(time,text);
+  const box=$('log');
+  box.appendChild(d);
+  box.scrollTop=box.scrollHeight;
+});
+api('/api/config').then(fillConfig);
+api('/api/inbox').then(renderInbox);
+</script>
+</body>
+</html>
